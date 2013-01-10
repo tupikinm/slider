@@ -31,6 +31,9 @@ function setpn(){
 	if($('.slide-prev').get(0) == $('.slides>div:last').get(0)) { $('.slide-prev').css({marginLeft: '-'+2*ww+'px'}); }
 	
 	setgrey([$('.slide-prev'),$('.slide-next')], false);
+	
+	$('.slide-left').unbind('click').click(function(){ $('.arrow-left').trigger('click'); });
+	$('.slide-right').unbind('click').click(function(){ $('.arrow-right').trigger('click'); });
 }
 
 var j = 0;
