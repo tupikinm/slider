@@ -98,6 +98,7 @@ function setcls() {
 
 	setgrey([prev,left,right,next], false);
 	setgrey([center], true);
+	center.find('span').css({display:'block',opacity:'1'});
 	 
 	//Отображаем панель слайдов
 	$('.slides').animate({opacity:'1'});
@@ -111,29 +112,26 @@ function setcls() {
 		var prev = $('.slide-prev');
 		var next = $('.slide-next');
 		
+		center.find('span').hide();
 		center.animate({	width: ww+'px', 
 							marginLeft:'0px', 
 							left:'0%', 
 							height:hh+'px', 
 							marginTop:'100px'
-						}, speed, function(){ $(this).removeClass('slide-center').addClass('slide-left').attr('style',''); });
+						}, speed, function(){
+												$(this).removeClass('slide-center').addClass('slide-left').attr('style',''); 
+											});
 						
 		prev.removeClass('slide-prev').addClass('slide');
 		
 		left.animate({marginLeft:'-'+ww+'px'}, speed, function(){ $(this).removeClass('slide-left').addClass('slide-prev').attr('style',''); });
-		var mr = w/2; 
-		if(right.get(0) == $('.slides>div:last').get(0)) 
-		{ 
-			//mr = Math.ceil(w*1.214);
-			mr = 350;
-		}
 		next.animate({marginRight: '0px' }, speed, function(){ $(this).removeClass('slide-next').attr('style','').addClass('slide-right'); });
-		right.css({position: 'relative', zIndex:'20', right: '0%'}).animate({	marginRight:'-'+mr+'px', 
+		right.css({position: 'relative', zIndex:'20', right: '0%'}).animate({	marginRight:'-'+w/2+'px', 
 																right:'50%', 
 																width:w+'px', 
 																height:h+'px', 
 																marginTop:'0'
-															}, speed, function(){ $(this).removeClass('slide-right').addClass('slide-center').attr('style',''); setpn(); });
+															}, speed, function(){ $(this).removeClass('slide-right').addClass('slide-center').attr('style','').find('span').fadeIn(); setpn(); });
 	
 		//изменяем размер обесцвеченных картинок и возвращаем им цвет
 		var img = right.find('img');
@@ -170,6 +168,7 @@ function setcls() {
 		var prev = $('.slide-prev');
 		var next = $('.slide-next');
 		
+		center.find('span').hide();
 		center.animate({	width:ww+'px', 
 							left:'100%', 
 							marginLeft:'-'+ww+'px', 
@@ -189,7 +188,7 @@ function setcls() {
 																width:w+'px',
 																height:h+'px',
 																marginTop:'0'
-															}, speed, function(){ $(this).removeClass('slide-left').addClass('slide-center').attr('style',''); });
+															}, speed, function(){ $(this).removeClass('slide-left').addClass('slide-center').attr('style','').find('span').fadeIn(); });
 		
 		prev.css({marginLeft:'-'+ww+'px'}).animate({marginLeft: mp+'px' }, speed, function(){ $(this).removeClass('slide-prev').addClass('slide-left'); });
 		right.animate({marginRight:'-'+ww+'px'}, speed, function(){ $(this).removeClass('slide-right').addClass('slide-next'); setpn();});
