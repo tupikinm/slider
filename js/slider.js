@@ -95,6 +95,9 @@ function setcls() {
 	center.removeClass('slide').addClass('slide-center');
 	right.removeClass('slide').addClass('slide-right');
 	next.removeClass('slide').addClass('slide-next');
+	
+	left.click(function(){ $('.arrow-left').trigger('click'); });
+	right.click(function(){ $('.arrow-right').trigger('click'); });
 
 	setgrey([prev,left,right,next], false);
 	setgrey([center], true);
