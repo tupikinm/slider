@@ -68,6 +68,7 @@ function init(){
 
 function setgrey(obj, rev){
 	for(i=0;i<obj.length;i++){
+	if(obj[i] == undefined) continue;
 		var im = obj[i].find('img');
 		obj[i].find('.gsWrapper').remove();
 		im.appendTo(obj[i]);
@@ -86,7 +87,6 @@ function setgrey(obj, rev){
 
 function setcls() {	
 	//Расставляем классы
-	var prev = $(slides[slides.length-1]);
 	var left = $(slides[0]);
 	var center = $(slides[1]);
 	var right = $(slides[2]);
@@ -94,7 +94,10 @@ function setcls() {
 		var next = $(slides[3]);
 		next.removeClass('slide').addClass('slide-next');
 	}
-	prev.removeClass('slide').addClass('slide-prev');
+	if(slides.length >=4){
+		var prev = $(slides[slides.length-1]);
+		prev.removeClass('slide').addClass('slide-next');
+	}
 	left.removeClass('slide').addClass('slide-left');
 	center.removeClass('slide').addClass('slide-center');
 	right.removeClass('slide').addClass('slide-right');
