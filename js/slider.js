@@ -71,15 +71,16 @@ function setgrey(obj, rev){
 		var im = obj[i].find('img');
 		obj[i].find('.gsWrapper').remove();
 		im.appendTo(obj[i]);
-		//obj[i].get(0).appendChild(im.get(0));
 		var img = im.get(0);
-		img.width = rev ? w : ww;
-		img.height = rev ? h : hh;
+		if(img != undefined) {
+			img.width = rev ? w : ww;
+			img.height = rev ? h : hh;
 		try {
-		$(img).greyScale({
-          	fadeTime: 0,
-          	reverse: rev
-        }); } catch(e){}
+			$(img).greyScale({
+    		  	fadeTime: 0,
+     	   	 	reverse: rev
+     	  	}); } catch(e){}
+    	}
     }
 }
 
@@ -89,12 +90,15 @@ function setcls() {
 	var left = $(slides[0]);
 	var center = $(slides[1]);
 	var right = $(slides[2]);
-	var next = $(slides[3]);
+	if(slides.length >=4){
+		var next = $(slides[3]);
+		next.removeClass('slide').addClass('slide-next');
+	}
 	prev.removeClass('slide').addClass('slide-prev');
 	left.removeClass('slide').addClass('slide-left');
 	center.removeClass('slide').addClass('slide-center');
 	right.removeClass('slide').addClass('slide-right');
-	next.removeClass('slide').addClass('slide-next');
+	
 	
 	left.click(function(){ $('.arrow-left').trigger('click'); });
 	right.click(function(){ $('.arrow-right').trigger('click'); });
@@ -108,6 +112,8 @@ function setcls() {
 
 	$('.arrow-right').click(function(){
 		if(flag) return; flag = true; //отменяем возможность клика пока не закончилась анимация
+		
+		if(check_slides('right')) return; //проверка по количеству слайдов
 		
 		var left = $('.slide-left');
 		var center = $('.slides>.slide-center');
@@ -164,6 +170,8 @@ function setcls() {
 	});
 	$('.arrow-left').click(function(){
 		if(flag) return; flag = true; //отменяем возможность клика пока не закончилась анимация
+		
+		if(check_slides('left')) return; //проверка по количеству слайдов
 		
 		var left = $('.slide-left');
 		var center = $('.slide-center:first');
@@ -222,6 +230,16 @@ function setcls() {
 	});
 }	
 //setInterval(function(){ $('.arrow-right').trigger('click'); }, 9000);
+
+function check_slides(side){
+	if(slides.length <= 3) return true; //возвращаем тру для запрета пролистывания слайдов
+	if(slides.length == 4) { //меняем класс для листания 4-х слайдов
+		if(side == 'right'&& $('.slide-prev').get(0) != undefined)
+			$('.slide-prev').get(0).className = 'slide-next';
+		if(side == 'left' && $('.slide-next').get(0) != undefined)
+			$('.slide-next').get(0).className = 'slide-prev';
+	}
+}
 
 init();
 	
