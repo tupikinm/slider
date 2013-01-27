@@ -21,7 +21,7 @@ document.onclick = function(e){
 	if(cls.indexOf('slide-') != -1) {
 		var id = 'arrow'+cls.replace('slide','').replace('pointer','').replace(/[\s]+/g, '');
 		var evt = d.createEvent('MouseEvents');
-		evt.initMouseEvent("click", true, true, window);
+		evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 		if(d.g(id) != undefined)
 			d.g(id).dispatchEvent(evt);
 	}
