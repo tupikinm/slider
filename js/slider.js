@@ -7,22 +7,48 @@ var h = 500;
 var ww = 500;
 var hh = 300;
 var i;
-var slides = new Array();
+var slides = [];
+var canslide = '';
+var win = window;
+var d = document;
+	d.g = document.getElementById;
+var cursor = '';
+
+//Клики по крайним картинкам
+document.onclick = function(e){
+	var trg = e.target||e.toElement;
+	var cls = trg.parentNode.parentNode.className;
+	if(cls.indexOf('slide-') != -1) {
+		var id = 'arrow'+cls.replace('slide','').replace('pointer','').replace(/[\s]+/g, '');
+		var evt = d.createEvent('MouseEvents');
+		evt.initMouseEvent("click", true, true, window);
+		if(d.g(id) != undefined)
+			d.g(id).dispatchEvent(evt);
+	}
+}
 
 function setpn(){
 	if($('.slide-prev').get(0) == undefined)
 	{
-		if($('.slide-left').prev('.slide').get(0) != undefined)
-			$('.slide-left').prev('.slide').removeClass('slide').addClass('slide-prev');
-		else
-			$('.slide:last').removeClass('slide').addClass('slide-prev');
+		var lprv = $('.slide-left').prev('.slide').get(0);
+		if(lprv != undefined)
+			lprv.className = 'slide-prev';
+		else {
+			var sl = $('.slide:last').get(0);
+			if(sl != undefined)
+				sl.className = 'slide-prev';
+		}
 	}
 	if($('.slide-next').get(0) == undefined)
 	{
-		if($('.slide-right').next('.slide').get(0) != undefined)
-			$('.slide-right').next('.slide').removeClass('slide').addClass('slide-next');
-		else
-			$('.slide:first').removeClass('slide').addClass('slide-next');
+		var rnxt = $('.slide-right').next('.slide').get(0);
+		if(rnxt != undefined)
+			rnxt.className = 'slide-next';
+		else {
+			var sf = $('.slide:first').get(0);
+			if(sf != undefined)
+				sf.className = 'slide-next';
+		}
 	}
 	
 	$('.slides>div').attr('style','');
@@ -31,9 +57,6 @@ function setpn(){
 	if($('.slide-prev').get(0) == $('.slides>div:last').get(0)) { $('.slide-prev').css({marginLeft: '-'+2*ww+'px'}); }
 	
 	setgrey([$('.slide-prev'),$('.slide-next')], false);
-	
-	$('.slide-left').unbind('click').click(function(){ $('.arrow-left').trigger('click'); });
-	$('.slide-right').unbind('click').click(function(){ $('.arrow-right').trigger('click'); });
 }
 
 var j = 0;
@@ -50,11 +73,7 @@ function imgload(){
 	}
 }
 
-function init(){
-	//Размер блока со стрелками
-	var p = $('.slides').parent();
-	$('<div id="arrows"><div class="arrow-left"></div><div class="arrow-right"></div></div>').prependTo(p);
-	$('#arrows').css({marginLeft: '-'+w/2+'px',	width:w+'px', height:h+'px'});
+(function(){
 
 	//Скрываем панель слайдов до загрузки изображений
 	$('.slides').css({opacity:'0'});
@@ -62,15 +81,26 @@ function init(){
 	//Определяем количество элементов для определения загруженности картинок
 	$('.slide').each(function(){ slides.push(this); });
 	i = slides.length - 1;
+	
+	//Размер блока со стрелками
+	if(i>=3){
+		var p = $('.slides').parent();
+		$('<div id="arrows"><div id="arrow-left"></div><div id="arrow-right"></div></div>').prependTo(p);
+		$('#arrows').css({marginLeft: '-'+w/2+'px',	width:w+'px', height:h+'px'});
+		cursor = 'pointer';
+	}
+	
 	imgload();
-}
+	
+	document.close();
+})();
 
 
 function setgrey(obj, rev){
 	for(i=0;i<obj.length;i++){
 	if(obj[i] == undefined) continue;
-		var im = obj[i].find('img');
-		obj[i].find('.gsWrapper').remove();
+		var im = $(obj[i]).find('img');
+		$(obj[i]).find('.gsWrapper').remove();
 		im.appendTo(obj[i]);
 		var img = im.get(0);
 		if(img != undefined) {
@@ -87,163 +117,131 @@ function setgrey(obj, rev){
 
 function setcls() {	
 	//Расставляем классы
-	var left = $(slides[0]);
-	var center = $(slides[1]);
-	var right = $(slides[2]);
+	var left = slides[0];
+	var center = slides[1];
+	var right = slides[2];
 	if(slides.length >=4){
-		var next = $(slides[3]);
-		next.removeClass('slide').addClass('slide-next');
+		var next = slides[3];
+		next.className = 'slide-next';
 	}
-	if(slides.length >=4){
-		var prev = $(slides[slides.length-1]);
-		prev.removeClass('slide').addClass('slide-next');
+	if(slides.length > 4){
+		var prev = slides[slides.length-1];
+		prev.className = 'slide-prev';
 	}
-	left.removeClass('slide').addClass('slide-left');
-	center.removeClass('slide').addClass('slide-center');
-	right.removeClass('slide').addClass('slide-right');
-	
-	
-	left.click(function(){ $('.arrow-left').trigger('click'); });
-	right.click(function(){ $('.arrow-right').trigger('click'); });
+	left.className = 'slide-left '+cursor;
+	center.className = 'slide-center';
+	right.className = 'slide-right '+cursor;
 
 	setgrey([prev,left,right,next], false);
 	setgrey([center], true);
-	center.find('span').css({display:'block',opacity:'1'});
+	$(center).find('span').css({display:'block',opacity:'1'});
 	 
 	//Отображаем панель слайдов
 	$('.slides').animate({opacity:'1'});
 
-	$('.arrow-right').click(function(){
+	d.g('arrow-right').onclick = function(){
 		if(flag) return; flag = true; //отменяем возможность клика пока не закончилась анимация
 		
-		if(check_slides('right')) return; //проверка по количеству слайдов
-		
-		var left = $('.slide-left');
-		var center = $('.slides>.slide-center');
-		var right = $('.slide-right');
-		var prev = $('.slide-prev');
-		var next = $('.slide-next');
-		
-		center.find('span').hide();
-		center.animate({	width: ww+'px', 
-							marginLeft:'0px', 
-							left:'0%', 
-							height:hh+'px', 
-							marginTop:'100px'
-						}, speed, function(){
-												$(this).removeClass('slide-center').addClass('slide-left').attr('style',''); 
-											});
-						
-		prev.removeClass('slide-prev').addClass('slide');
-		
-		left.animate({marginLeft:'-'+ww+'px'}, speed, function(){ $(this).removeClass('slide-left').addClass('slide-prev').attr('style',''); });
-		next.animate({marginRight: '0px' }, speed, function(){ $(this).removeClass('slide-next').attr('style','').addClass('slide-right'); });
-		right.css({position: 'relative', zIndex:'20', right: '0%'}).animate({	marginRight:'-'+w/2+'px', 
+		if(check_slides('right')) return; //проверка по количеству слайдов				
+	
+		$('.slide-left').animate({marginLeft:'-'+ww+'px'}, speed, function(){ this.className = 'slide-prev'; this.setAttribute('style',''); });
+		$('.slide-next').animate({marginRight: '0px' }, speed, function(){ this.className = 'slide-right '+cursor; this.setAttribute('style',''); });
+		$('.slide-right').css({position: 'relative', zIndex:'20', right: '0%'}).animate({	marginRight:'-'+w/2+'px', 
 																right:'50%', 
 																width:w+'px', 
 																height:h+'px', 
 																marginTop:'0'
-															}, speed, function(){ $(this).removeClass('slide-right').addClass('slide-center').attr('style','').find('span').fadeIn(); setpn(); });
-	
-		//изменяем размер обесцвеченных картинок и возвращаем им цвет
-		var img = right.find('img');
-		$(img).animate({width:w+'px', height:h+'px'}, speed,
-		function(){
-			if ($.browser.msie) {
-      			// фиксим эксплорер
-       			$(img).css({
-          		'filter': 'progid:DXImageTransform.Microsoft.BasicImage(grayscale=0)'
-        	});
-		}
-		});
-		right.find('.gsCanvas').animate({width:w+'px', height:h+'px', opacity:'0'}, speed);
+															}, speed, function(){ 
+																					this.className = 'slide-center';
+																					this.setAttribute('style','');
+																					$(this).find('span').fadeIn(); 
+																					setpn(); 
+																				});
+		moving('right');
 		
-		
-		//обесцвечиваем центральную и уменьшаем картинку
-		var cimg = center.find('img');
-		cimg.appendTo(center);
-		cimg.animate({width:ww+'px', height:hh+'px'}, speed);
-		center.find('.gsWrapper').remove();
-		cimg.greyScale({
-          	fadeTime: speed,
-          	reverse: false
-        });
-        center.find('.gsCanvas').animate({width:ww+'px', height:hh+'px'},{queue: false, duration:speed});
-		
-	});
-	$('.arrow-left').click(function(){
+	};
+	d.g('arrow-left').onclick = function(){
 		if(flag) return; flag = true; //отменяем возможность клика пока не закончилась анимация
 		
 		if(check_slides('left')) return; //проверка по количеству слайдов
 		
-		var left = $('.slide-left');
-		var center = $('.slide-center:first');
-		var right = $('.slide-right');
-		var prev = $('.slide-prev');
-		var next = $('.slide-next');
-		
-		center.find('span').hide();
-		center.animate({	width:ww+'px', 
-							left:'100%', 
-							marginLeft:'-'+ww+'px', 
-							height:hh+'px', 
-							marginTop:'100px'
-						}, speed, function(){ $(this).removeClass('slide-center').addClass('slide-right'); });
-		
-		next.removeClass('slide-next').addClass('slide');
-		var ml = w/2;
-		var mp = 0;
-		if($('.slide-prev').get(0) == $('.slides>div:last').get(0)) 
-		{
-
-		}
-		left.css({position:'absolute', zIndex:'20'}).animate({	marginLeft:'-'+ml+'px',
+		$('.slide-right').animate({marginRight:'-'+ww+'px'}, speed, function(){ this.className = 'slide-next'; this.setAttribute('style',''); });
+		$('.slide-prev').css({marginLeft:'-'+ww+'px'}).animate({marginLeft: '0px' }, speed, function(){ this.className = 'slide-left '+cursor; this.setAttribute('style',''); });
+		$('.slide-left').css({position:'absolute', zIndex:'20'}).animate({	marginLeft:'-'+w/2+'px',
 																left:'50%',
 																width:w+'px',
 																height:h+'px',
 																marginTop:'0'
-															}, speed, function(){ $(this).removeClass('slide-left').addClass('slide-center').attr('style','').find('span').fadeIn(); });
-		
-		prev.css({marginLeft:'-'+ww+'px'}).animate({marginLeft: mp+'px' }, speed, function(){ $(this).removeClass('slide-prev').addClass('slide-left'); });
-		right.animate({marginRight:'-'+ww+'px'}, speed, function(){ $(this).removeClass('slide-right').addClass('slide-next'); setpn();});
-	
-		//изменяем размер обесцвеченных картинок и возвращаем им цвет
-		var img = left.find('img');
-		$(img).animate({width:w+'px', height:h+'px'}, speed, 
-		function(){
-			if ($.browser.msie) {
-      			// фиксим эксплорер
-       			$(img).css({
-          		'filter': 'progid:DXImageTransform.Microsoft.BasicImage(grayscale=0)'
-        	});
-		}
-		});
-		left.find('.gsCanvas').animate({width:w+'px', height:h+'px', opacity:'0'}, speed);
-		
-		//обесцвечиваем центральную и уменьшаем картинку
-		var cimg = center.find('img');
-		cimg.appendTo(center);
-		cimg.animate({width:ww+'px', height:hh+'px'}, speed);
-		center.find('.gsWrapper').remove();
-		cimg.greyScale({
-          	fadeTime: speed,
-          	reverse: false
-        });
-        center.find('.gsCanvas').animate({width:ww+'px', height:hh+'px'},{queue: false, duration:speed});
-	});
+															}, speed, function(){ 
+																					this.className = 'slide-center';
+																					this.setAttribute('style','');
+																					$(this).find('span').fadeIn(); 
+																					setpn(); 
+																				});
+		moving('left');
+	};
 }	
 //setInterval(function(){ $('.arrow-right').trigger('click'); }, 9000);
 
 function check_slides(side){
 	if(slides.length <= 3) return true; //возвращаем тру для запрета пролистывания слайдов
 	if(slides.length == 4) { //меняем класс для листания 4-х слайдов
-		if(side == 'right'&& $('.slide-prev').get(0) != undefined)
-			$('.slide-prev').get(0).className = 'slide-next';
-		if(side == 'left' && $('.slide-next').get(0) != undefined)
-			$('.slide-next').get(0).className = 'slide-prev';
+	var pr = $('.slide-prev').get(0);
+	var nxt = $('.slide-next').get(0);
+		if(side == 'right'&& pr != undefined)
+			pr.className = 'slide-next';
+		if(side == 'left' && nxt != undefined)
+			nxt.className = 'slide-prev';
 	}
 }
 
-init();
+//Движение слайдов и работа с обесцвечиванием
+function moving(side){
+	left = $('.slide-left');
+	center = $('.slide-center:first');
+	right = $('.slide-right');
+	prev = $('.slide-prev');
+	next = $('.slide-next');
+	
+	center.find('span').hide();
+	
+	var el = (side=='right') ? prev : next;
+	if(el.get(0)!=undefined)
+		el.get(0).className = 'slide';
+	
+	if(side == 'right') {
+		var ml = '0px'; var l = '0%'; var cl = 'left';
+	}
+	else {
+		var ml = '-'+ww+'px'; var l = '100%'; var cl = 'right';
+	}
+	center.animate({width: ww+'px', 
+					marginLeft: ml, 
+					left: l, 
+					height:hh+'px', 
+					marginTop:'100px'
+				}, speed, function(){ this.className = 'slide-'+cl+' '+cursor; this.setAttribute('style',''); });
+
+	//изменяем размер обесцвеченных картинок и возвращаем им цвет
+	var img = win[side].find('img');
+	$(img).animate({width:w+'px', height:h+'px'}, speed, function(){
+		if ($.browser.msie)
+      		// фиксим эксплорер
+       		$(img).css({'filter': 'progid:DXImageTransform.Microsoft.BasicImage(grayscale=0)'});
+	});
+	
+	win[side].find('.gsCanvas').animate({width:w+'px', height:h+'px', opacity:'0'}, speed);
+	
+	//обесцвечиваем центральную и уменьшаем картинку
+	var cimg = center.find('img');
+		cimg.appendTo(center);
+		cimg.animate({width:ww+'px', height:hh+'px'}, speed);
+		center.find('.gsWrapper').remove();
+		cimg.greyScale({
+          	fadeTime: speed,
+          	reverse: false
+        });
+        center.find('.gsCanvas').animate({width:ww+'px', height:hh+'px'},{queue: false, duration:speed});
+}
 	
 });
